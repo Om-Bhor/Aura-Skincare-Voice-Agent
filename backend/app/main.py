@@ -13,15 +13,23 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 app = FastAPI(title="Aria — Aura Skincare Voice Agent", version="0.1.0")
-frontend_origin = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
+
+frontend_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+deployed_origin = os.getenv("FRONTEND_ORIGIN", "").strip().rstrip("/")
+if deployed_origin:
+    frontend_origins.extend(
+        origin.strip().rstrip("/")
+        for origin in deployed_origin.split(",")
+        if origin.strip()
+    )
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:5174",
-    ],
+    allow_origins=frontend_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
